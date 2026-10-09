@@ -242,7 +242,9 @@ const Engine = {
     }[endId] || { t: "终", bg: "bg_snow", d: "" };
     document.getElementById("game-screen").classList.add("hidden");
     document.getElementById("ending-screen").classList.remove("hidden");
-    document.getElementById("ending-bg").style.backgroundImage = `url(cg/${data.bg}.jpg), url(bg/${data.bg}.jpg)`;
+    // 按前缀选文件夹，避免 cg/bg_xxx.jpg 的 404
+    const bgUrl = data.bg.startsWith("cg_") ? `cg/${data.bg}.jpg` : `bg/${data.bg}.jpg`;
+    document.getElementById("ending-bg").style.backgroundImage = `url(${bgUrl})`;
     document.getElementById("ending-title").textContent = this._endingTitle || data.t;
     document.getElementById("ending-desc").textContent = data.d;
     const a = this.affection;
