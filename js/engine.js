@@ -71,6 +71,7 @@ const Engine = {
   },
 
   jump(id) {
+    clearTimeout(this.autoTimer); clearTimeout(this.skipTimer);
     let n = this.nodeMap[id];
     if (!n) { console.error("missing node:", id); return; }
     // 结局组重定向到首节点
@@ -83,10 +84,12 @@ const Engine = {
   advance() {
     if (!document.getElementById("choice-box").classList.contains("hidden")) return;
     if (this.typing) { this.finishType(); return; }
-    if (this.auto || this.skip) return;
     const n = this.nodeMap[this.currentId];
+    if (!n) return;
     if (n.choice) return; // 等待选择
-    if (n.ending) return;
+    if (n.ending) return; // 已在结局屏
+    // 剧终节点：弹出结局屏，绝不串到下一个结局
+    if (n.the_end) { this.showEnding(this._endingId || "end_alone"); return; }
     if (n.go) this.jump(n.go);
     else if (this.idx + 1 < this.nodes.length) this.jump(this.nodes[this.idx + 1].id);
   },
@@ -114,17 +117,16 @@ const Engine = {
       this.jump(ok ? c.go : c.else);
       return;
     }
-    // 结局
+    // 结局（旧式节点，直接弹屏）
     if (n.ending) { this.showEnding(n.ending); return; }
-    // 剧终节点
-    if (n.the_end) { this.showEnding(this._endingId || "end_alone"); return; }
+    // 剧终节点：先正常显示最后一行台词，玩家点继续后 advance() 再弹结局屏
 
     // 背景 / CG
     if (n.bg) {
       const isCG = n.bg.startsWith("cg_");
       const layer = document.getElementById(isCG ? "cg-layer" : "bg-layer");
       const other = document.getElementById(isCG ? "bg-layer" : "cg-layer");
-      const file = isCG ? `cg/${n.bg}.png` : `bg/${n.bg}.png`;
+      const file = isCG ? `cg/${n.bg}.jpg` : `bg/${n.bg}.jpg`;
       layer.style.backgroundImage = `url(${file})`;
       layer.classList.remove("hidden");
       if (isCG) { this.seenCG.add(n.bg); this.saveSeen(); }
@@ -135,7 +137,7 @@ const Engine = {
     // 立绘
     if (n.show) for (const s of n.show) {
       const img = document.getElementById("sprite-" + s.pos);
-      img.src = `characters/${s.c}.png`;
+      img.src = `characters/${s.c}.jpg`;
       img.classList.remove("hidden");
       img.dataset.char = s.c;
     }
@@ -168,7 +170,6 @@ const Engine = {
     } else {
       this.typeText(n.text, null);
     }
-    if (this.skip) setTimeout(() => this.advance(), 60);
   },
 
   charKey(name) {
@@ -199,9 +200,11 @@ const Engine = {
     document.getElementById("text-box").textContent = this.fullText;
     document.getElementById("next-indicator").style.visibility = "visible";
     if (this._typeDone) { const d = this._typeDone; this._typeDone = null; d(); }
-    else if (this.auto) {
-      clearTimeout(this.autoTimer);
-      this.autoTimer = setTimeout(() => this.advance(), 1800 + this.fullText.length * 30);
+    else if (this.auto || this.skip) {
+      clearTimeout(this.autoTimer); clearTimeout(this.skipTimer);
+      const delay = this.skip ? 200 : 1800 + this.fullText.length * 30;
+      const t = setTimeout(() => this.advance(), delay);
+      if (this.skip) this.skipTimer = t; else this.autoTimer = t;
     }
   },
 
@@ -225,6 +228,9 @@ const Engine = {
 
   /* ---------- 结局 ---------- */
   showEnding(endId) {
+    this.auto = false; this.skip = false;
+    clearTimeout(this.autoTimer); clearTimeout(this.skipTimer);
+    document.querySelectorAll("#top-bar button").forEach(b => b.classList.remove("on"));
     AudioSys.play("moshi");
     const data = {
       end_linger_true:  { t: "再续前缘", bg: "cg_snow", d: "历经生死，灵儿终于回到了逍遥身边。一家三口归隐仙灵岛，笑声洒满荷花池。" },
@@ -236,12 +242,13 @@ const Engine = {
     }[endId] || { t: "终", bg: "bg_snow", d: "" };
     document.getElementById("game-screen").classList.add("hidden");
     document.getElementById("ending-screen").classList.remove("hidden");
-    document.getElementById("ending-bg").style.backgroundImage = `url(cg/${data.bg}.png), url(bg/${data.bg}.png)`;
+    document.getElementById("ending-bg").style.backgroundImage = `url(cg/${data.bg}.jpg), url(bg/${data.bg}.jpg)`;
     document.getElementById("ending-title").textContent = this._endingTitle || data.t;
     document.getElementById("ending-desc").textContent = data.d;
     const a = this.affection;
+    const worms = this.flags.kui_lei_chong || 0;
     document.getElementById("ending-stats").innerHTML =
-      `灵儿好感 ${a.linger} · 月如好感 ${a.yueru} · 阿奴好感 ${a.anu}<br>已收集CG ${this.seenCG.size} 张`;
+      `灵儿好感 ${a.linger} · 月如好感 ${a.yueru} · 阿奴好感 ${a.anu}<br>傀儡虫 ${worms} 只 · 已收集CG ${this.seenCG.size} 张`;
     // 解锁结局CG
     const key = "__endings";
     const got = JSON.parse(localStorage.getItem("xianjian_" + key) || "[]");
@@ -321,8 +328,8 @@ const Engine = {
       const unlocked = seen.has(cg);
       div.className = "gallery-item" + (unlocked ? "" : " locked");
       if (unlocked) {
-        div.style.backgroundImage = `url(cg/${cg}.png)`;
-        div.onclick = () => window.open(`cg/${cg}.png`, "_blank");
+        div.style.backgroundImage = `url(cg/${cg}.jpg)`;
+        div.onclick = () => window.open(`cg/${cg}.jpg`, "_blank");
       }
       grid.appendChild(div);
     }
@@ -338,18 +345,21 @@ const Engine = {
   toggleAuto(btn) {
     this.auto = !this.auto;
     btn.classList.toggle("on", this.auto);
-    if (this.auto && !this.typing) this.finishType();
+    if (this.auto) { if (!this.typing) this.advance(); }
+    else clearTimeout(this.autoTimer);
   },
 
   toggleSkip(btn) {
     this.skip = !this.skip;
     btn.classList.toggle("on", this.skip);
     if (this.skip) this.advance();
+    else clearTimeout(this.skipTimer);
   },
 
   toTitle() {
     AudioSys.stop();
     this.auto = false; this.skip = false;
+    clearTimeout(this.autoTimer); clearTimeout(this.skipTimer);
     document.querySelectorAll("#top-bar button").forEach(b => b.classList.remove("on"));
     document.getElementById("game-screen").classList.add("hidden");
     document.getElementById("ending-screen").classList.add("hidden");

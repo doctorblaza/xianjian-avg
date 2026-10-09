@@ -1,6 +1,6 @@
 /* 仙剑AVG · 音频系统
- * BGM 槽位映射仙剑曲名。优先播放 music/ 下的同名 mp3（用户自备），
- * 若无文件则用 WebAudio 生成五声音阶古风氛围兜底，保证不静音。
+ * BGM 槽位映射仙剑曲名。播放 music/ 下内置的仙剑原声 mp3；
+ * 若文件解码失败，则用 WebAudio 生成五声音阶古风氛围兜底，保证不静音。
  */
 const BGM_SLOTS = {
   dielian:   { file: "music/蝶恋.mp3",       mood: "tender"  }, // 主题/爱情

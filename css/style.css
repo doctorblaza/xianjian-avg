@@ -104,3 +104,32 @@ body {
 .gallery-item.locked { filter: brightness(.15); cursor: default; }
 .gallery-item.locked::after { content: "?"; position: absolute; inset: 0; display: flex;
   align-items: center; justify-content: center; font-size: 40px; color: #5a4a30; }
+
+/* ---- 手机竖屏适配 ---- */
+@media (orientation: portrait) {
+  #stage { width: 100vw; height: 100dvh; max-width: 100vw; max-height: 100dvh;
+    top: 0; transform: none; box-shadow: none; }
+  .game-title { font-size: 15vw; letter-spacing: 4vw; text-indent: 4vw; }
+  .game-subtitle { font-size: 3.6vw; letter-spacing: 1.6vw; margin: 3vw 0 8vw; }
+  .title-menu button { font-size: 4.8vw; padding: 3vw 14vw; letter-spacing: 2.4vw; text-indent: 2.4vw; }
+  .title-note { font-size: 3.2vw; margin-top: 8vw; padding: 0 6vw; }
+  .sprite { height: 46%; }
+  #dialog-box { left: 3%; right: 3%; bottom: 2%; min-height: 30%; max-height: 44%;
+    overflow-y: auto; padding: 5vw 5vw 7vw; }
+  #name-box { font-size: 4vw; top: -4.4vw; left: 5vw; padding: 1.4vw 6vw; letter-spacing: 1.6vw; }
+  #text-box { font-size: 4.3vw; line-height: 1.9; min-height: 0; letter-spacing: .5vw; }
+  #next-indicator { right: 4vw; bottom: 2vw; font-size: 3.4vw; }
+  #choice-box { width: 88%; min-width: 0; gap: 2.6vw; }
+  #choice-box button { font-size: 4.2vw; padding: 3.2vw 4vw; letter-spacing: .8vw; }
+  #top-bar { top: 2vw; right: 2vw; left: 2vw; flex-wrap: wrap; justify-content: flex-end; gap: 1.6vw; opacity: .85; }
+  #top-bar button { font-size: 3.4vw; padding: 1.8vw 3vw; letter-spacing: .6vw; }
+  #ending-title { font-size: 9vw; letter-spacing: 3vw; text-indent: 3vw; }
+  #ending-desc { font-size: 4.2vw; padding: 0 4vw; }
+  .ending-stats { font-size: 3.4vw; }
+  .ending-content { padding: 0 6vw; }
+  .ending-content button { font-size: 4.6vw; padding: 3vw 12vw; letter-spacing: 2vw; text-indent: 2vw; }
+  .modal-box { min-width: 0; width: 92%; padding: 6vw; }
+  .modal-box.wide { min-width: 0; width: 94%; }
+  .modal-box h3 { font-size: 5vw; }
+  #gallery-grid { grid-template-columns: repeat(2, 1fr); }
+}
