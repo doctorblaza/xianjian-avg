@@ -22,7 +22,15 @@ const Engine = {
         const r = await fetch(`js/${f}.json`);
         if (r.ok) {
           const arr = await r.json();
-          for (const n of arr) { this.nodes.push(n); this.nodeMap[n.id] = n; }
+          for (const n of arr) {
+            // 结局文件是分组结构 {id, title, nodes[]}，展平
+            if (n.nodes && Array.isArray(n.nodes)) {
+              if (n.nodes.length) this.nodeMap[n.id] = { _redirect: n.nodes[0].id, _title: n.title };
+              for (const sub of n.nodes) { this.nodes.push(sub); this.nodeMap[sub.id] = sub; }
+            } else {
+              this.nodes.push(n); this.nodeMap[n.id] = n;
+            }
+          }
         }
       } catch (e) { console.warn("load fail:", f); }
     }
@@ -63,9 +71,11 @@ const Engine = {
   },
 
   jump(id) {
-    const n = this.nodeMap[id];
+    let n = this.nodeMap[id];
     if (!n) { console.error("missing node:", id); return; }
-    this.currentId = id;
+    // 结局组重定向到首节点
+    if (n._redirect) { this._endingId = id; this._endingTitle = n._title; n = this.nodeMap[n._redirect]; }
+    this.currentId = n.id;
     this.idx = this.nodes.indexOf(n);
     this.render(n);
   },
@@ -106,6 +116,8 @@ const Engine = {
     }
     // 结局
     if (n.ending) { this.showEnding(n.ending); return; }
+    // 剧终节点
+    if (n.the_end) { this.showEnding(this._endingId || "end_alone"); return; }
 
     // 背景 / CG
     if (n.bg) {
@@ -225,7 +237,7 @@ const Engine = {
     document.getElementById("game-screen").classList.add("hidden");
     document.getElementById("ending-screen").classList.remove("hidden");
     document.getElementById("ending-bg").style.backgroundImage = `url(cg/${data.bg}.png), url(bg/${data.bg}.png)`;
-    document.getElementById("ending-title").textContent = data.t;
+    document.getElementById("ending-title").textContent = this._endingTitle || data.t;
     document.getElementById("ending-desc").textContent = data.d;
     const a = this.affection;
     document.getElementById("ending-stats").innerHTML =
