@@ -137,7 +137,7 @@ const Engine = {
     // 立绘
     if (n.show) for (const s of n.show) {
       const img = document.getElementById("sprite-" + s.pos);
-      img.src = `characters/${s.c}.jpg`;
+      img.src = `characters/${s.c}.webp`;
       img.classList.remove("hidden");
       img.dataset.char = s.c;
     }
