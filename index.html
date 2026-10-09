@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>仙剑奇侠传 · 恋爱AVG</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <!-- 标题画面 -->
+  <div id="title-screen">
+    <div class="title-bg"></div>
+    <div class="title-content">
+      <h1 class="game-title">仙剑奇侠传</h1>
+      <p class="game-subtitle">—— 恋爱 AVG · 同人致敬作 ——</p>
+      <div class="title-menu">
+        <button id="btn-start">开始游戏</button>
+        <button id="btn-continue">继续游戏</button>
+        <button id="btn-gallery">CG 鉴赏</button>
+      </div>
+      <p class="title-note">本作为粉丝同人作品，剧情致敬 1995 年《仙剑奇侠传》<br>音乐请将仙剑原声放入 music/ 文件夹</p>
+    </div>
+  </div>
+
+  <!-- 游戏主画面 -->
+  <div id="game-screen" class="hidden">
+    <div id="bg-layer"></div>
+    <div id="cg-layer" class="hidden"></div>
+    <div id="sprite-layer">
+      <img id="sprite-left" class="sprite hidden" alt="">
+      <img id="sprite-center" class="sprite hidden" alt="">
+      <img id="sprite-right" class="sprite hidden" alt="">
+    </div>
+    <div id="dialog-box">
+      <div id="name-box" class="hidden"></div>
+      <div id="text-box"></div>
+      <div id="next-indicator">▼</div>
+    </div>
+    <div id="choice-box" class="hidden"></div>
+    <div id="top-bar">
+      <button id="btn-save" title="存档">存档</button>
+      <button id="btn-load" title="读档">读档</button>
+      <button id="btn-backlog" title="回顾">回顾</button>
+      <button id="btn-auto" title="自动">自动</button>
+      <button id="btn-skip" title="快进">快进</button>
+      <button id="btn-title" title="标题">标题</button>
+    </div>
+  </div>
+
+  <!-- 结局画面 -->
+  <div id="ending-screen" class="hidden">
+    <div id="ending-bg"></div>
+    <div class="ending-content">
+      <h2 id="ending-title"></h2>
+      <p id="ending-desc"></p>
+      <div class="ending-stats" id="ending-stats"></div>
+      <button id="btn-ending-title">回到标题</button>
+    </div>
+  </div>
+
+  <!-- 存档面板 -->
+  <div id="save-panel" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="save-panel-title">存档</h3>
+      <div id="save-slots"></div>
+      <button class="modal-close">关闭</button>
+    </div>
+  </div>
+
+  <!-- 回顾面板 -->
+  <div id="backlog-panel" class="modal hidden">
+    <div class="modal-box wide">
+      <h3>剧情回顾</h3>
+      <div id="backlog-list"></div>
+      <button class="modal-close">关闭</button>
+    </div>
+  </div>
+
+  <!-- CG鉴赏 -->
+  <div id="gallery-panel" class="modal hidden">
+    <div class="modal-box wide">
+      <h3>CG 鉴赏</h3>
+      <div id="gallery-grid"></div>
+      <button class="modal-close">关闭</button>
+    </div>
+  </div>
+</div>
+<script src="js/audio.js"></script>
+<script src="js/engine.js"></script>
+</body>
+</html>
